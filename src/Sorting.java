@@ -157,6 +157,7 @@ public class Sorting {
     }
 
     public static int[] quick_sort(int[] A, int low, int high) {
+
         if (low < high) {
             int pivotIndex = randomizedPartition(A, low, high);
             quick_sort(A, low, pivotIndex - 1);
@@ -199,7 +200,60 @@ public class Sorting {
     // </editor-fold>
 
     // <editor-fold desc = "ANALYSIS">
-    static public float test(int sort, int type ,int size  ){
+    static public float test_manual(int sort, int type) {
+        // Sabit array ile testArray oluşturuluyor
+        int[] testArray = { 5, 2, 8, 1, 3, 7, 4, 6, 9 }; // Burada istediğiniz array'i belirleyebilirsiniz
+
+        // File Type (random / inc / dec) işlemi
+        switch (type) {
+            case 1:
+                // Default, array zaten verilmiş
+                break;
+            case 2:
+                // Artan sırayla sıralama
+                Arrays.sort(testArray);
+                break;
+            case 3:
+                // Azalan sırayla sıralama
+                Arrays.sort(testArray);
+                int[] tempArray = new int[testArray.length];
+                int j = 0;
+                for (int i = testArray.length - 1; i >= 0; i--) {
+                    tempArray[j] = testArray[i];
+                    j++;
+                }
+                testArray = tempArray;
+                break;
+            default:
+                System.out.println("Type error");
+                break;
+        }
+
+        // Sort Type (Insertion / Merge / Heap / Quick)
+        long startTime = System.currentTimeMillis();
+        switch (sort) {
+            case 1:
+                testArray = insertion_sort(testArray);
+                break;
+            case 2:
+                testArray = merge_sort(testArray);
+                break;
+            case 3:
+                testArray = heapSort(testArray);
+                break;
+            case 4:
+                testArray = quick_sort(testArray, 0, testArray.length - 1);
+                break;
+            default:
+                System.out.println("Invalid choice of test");
+                break;
+        }
+        long endTime = System.currentTimeMillis();
+
+        return (float) (endTime - startTime) / 1000;  // saniye cinsinden dönüş
+    }
+
+    static public float testTime(int sort, int type ,int size  ){
         File file = null;
         int fileSize = 0;
 
@@ -283,29 +337,96 @@ public class Sorting {
         for( int i = 1;i<=4;i++){
             for( int j = 1;j<=3;j++){
                 for( int k = 1;k<=3;k++){
-                    System.out.println(test(i,j,k));
+                    System.out.println(testTime(i,j,k));
                 }
             }
         }
     }
-    static public void outputWanted(){
+    static public int[] testForHW(int sort, int type ,int size){
+        File file = null;
+        int fileSize = 0;
 
-        float[] ms = new float[combination];
-        int count = 0;
+
+        // File Size ( 1.000 / 10.000 / 100.000 )
+        switch (size){
+            case 1:
+                file = _1K_random_input;
+                fileSize = 1000;
+                break;
+            case 2:
+                file = _10K_random_input;
+                fileSize = 10000;
+                break;
+            case 3:
+                file = _100K_random_input;
+                fileSize = 100000;
+                break;
+            default:
+                System.out.println("File Size Error");
+                break;
+
+        }
+        int[] testArray = fileRead(file);
+
+        // File Type ( random / inc / dec )
+        switch (type){
+            case 1:
+                // Default
+                break;
+            case 2:
+                Arrays.sort(testArray);
+                break;
+            case 3:
+                Arrays.sort(testArray);
+                int[] tempArray = new int[testArray.length];
+                int j =0;
+                for (int i = testArray.length - 1; i >= 0; i--) {
+                    tempArray[j] = testArray[i];
+                    j++;
+                }
+                testArray = tempArray;
+                break;
+            default:
+                System.out.println("Type error");
+                break;
+        }
+
+        // Sort Type ( Insertion / Merge / Heap / Quick )
+
+        switch (sort){
+            case 1:
+                testArray = insertion_sort(testArray);
+                break;
+            case 2:
+                testArray = merge_sort(testArray);
+                break;
+            case 3:
+                testArray = heapSort(testArray);
+                break;
+            case 4:
+                testArray = quick_sort(testArray,0,testArray.length-1);
+                break;
+            default:
+                System.out.println("Invalid choice of test");
+                break;
+        }
+
+        return testArray;
+    }
+    static public void outputWanted(){
         try {
             File directory = new File("outputs");
             directory.mkdirs();
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 3; j++) {
-                    for (int k = 0; k < 3; k++) {
-                        ms[count] += test(i + 1, j + 1,  k + 1);
-                        System.out.println(test(i + 1, j + 1, k + 1)+" "+test[i]+" " +type[j]+" "+ size[k]);
-                        FileWriter txtWriter = new FileWriter("outputs/"+test[i]+"_" +size[j]+"_" +type[k]+"output" +".txt");
-                        txtWriter.append("Time (ms) :");
-                        txtWriter.append(String.format("%.6f", ms[count])).append("\n");
+            for (int i = 1; i <= 4; i++) {
+                for (int j = 1; j <= 3; j++) {
+                    for (int k = 1; k <= 3; k++) {
+                        int[] sortedArray = testForHW(i,j,k);
+                        FileWriter txtWriter = new FileWriter("outputs/"+test[i-1]+"_" +size[k-1]+"_" +type[j-1]+"output" +".txt");
+                        for(int r = 0;r<sortedArray.length;r++){
+                            txtWriter.append(sortedArray[r]+"\n");
+                        }
                         txtWriter.flush();
                         txtWriter.close();
-                        count++;
                     }
                 }
             }
@@ -323,7 +444,7 @@ public class Sorting {
             for( int i = 0;i<=3;i++){
                 for( int j = 0;j<=2;j++){
                     for( int k = 0;k<=2;k++){
-                        ms[count] += test(i+1,j+1,k+1);
+                        ms[count] += testTime(i+1,j+1,k+1);
                         count++;
                     }
                 }
@@ -397,11 +518,12 @@ public class Sorting {
         //  Heap : 3            100.000 : 3     Decreasing : 3
         //  Quick : 4
 
-        //  test(x,y,z)         to try any combination
-        //  allPossibilities(); to get all 36 combination
-          outputPrecise();    //to get a .csv file with all the data out of 20(as much as wanted "overall_from") repetition
-        outputWanted();
 
+        //  test(x,y,z)         to try any combination
+        //allPossibilities(); //to get all 36 combination
+        //outputPrecise();    //to get a .csv file with all the data out of 20(as much as wanted "overall_from") repetition
+        outputWanted();
+        //test_manual(4,1);
 
 
     }
